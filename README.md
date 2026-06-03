@@ -32,8 +32,7 @@ The OU model treats local magnetic-field fluctuations as a stationary stochastic
 
 ```text
 ou-nmr/
-├── data/
-│   └── raw/                 # Experimental T1 and T2 data
+├── data/                    # Experimental T1 and T2 data
 ├── src/
 │   └── ounmr/               # Reusable analysis code
 ├── scripts/                 # Reproducible analysis pipeline
@@ -43,4 +42,7 @@ ou-nmr/
 ├── notebooks/               # Original exploratory notebook
 ├── paper/                   # Written report
 ├── presentation/            # Presentation slides
+├── supplement/              # Supplementary derivations
+│   ├── ou-update-rule/             
+│   └── hahn-echo-dephasing/  
 └── README.md
