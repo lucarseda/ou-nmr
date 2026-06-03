@@ -1,0 +1,95 @@
+# ----------------------------
+# macOS / system files
+# ----------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+
+
+# ----------------------------
+# Python cache/build files
+# ----------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+build/
+dist/
+*.egg-info/
+.eggs/
+
+
+# ----------------------------
+# Virtual environments
+# ----------------------------
+.venv/
+venv/
+env/
+ENV/
+
+
+# ----------------------------
+# Jupyter notebooks
+# ----------------------------
+.ipynb_checkpoints/
+
+
+# ----------------------------
+# Python testing / coverage
+# ----------------------------
+.pytest_cache/
+.coverage
+htmlcov/
+
+
+# ----------------------------
+# Environment variables / secrets
+# ----------------------------
+.env
+.env.*
+*.key
+*.pem
+
+
+# ----------------------------
+# LaTeX build artifacts
+# ----------------------------
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.nav
+*.snm
+
+
+# ----------------------------
+# Editor files
+# ----------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+
+# ----------------------------
+# Temporary files
+# ----------------------------
+*.tmp
+*.temp
+*.bak
+~$*
+
+
+# ----------------------------
+# Project-specific generated cache
+# ----------------------------
+results/cache/

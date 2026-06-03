@@ -1,0 +1,123 @@
+\documentclass[12pt,reqno]{amsart}
+
+\usepackage{graphicx}
+
+\usepackage{amssymb}
+\usepackage{amsthm}
+\theoremstyle{plain}
+
+\newtheorem*{theorem*}{Theorem}
+%% this allows for theorems which are not automatically numbered
+
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{example}{Example}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\usepackage{lineno}
+
+%% The above lines are for formatting.  In general, you will not want to change these.
+
+
+\title{Exact Ornstein-Uhlenbeck Numerical Update Rule}
+
+\author{Luca Roncoroni Seda}
+
+\begin{document}
+
+\begin{abstract}
+    In this supplement, we derive the exact numerical update rule used in simulating the Ornstein-Uhlenbeck magnetic field model, justifying its usage as opposed to the Euler-Maruyama scheme.
+\end{abstract}
+
+\maketitle
+
+Let $X_t$ be a random variable satisfying the Ornstein-Uhlenbeck SDE
+\begin{equation*}
+    dX_t = -\lambda X_t dt + \sigma dW_t, \quad \lambda = \frac{1}{\tau_c} > 0.
+\end{equation*}
+We wish to derive an exact discrete-time update for $X_{n+1} = X(t_n+\Delta t)$ given $X_n = X(t_n)$.
+
+\section{Existence and form of the solution}
+The SDE is linear with globally Lipschitz drift $b(x) = -\lambda x$ and constant diffusion coefficient $\sigma(x) = \sigma$. Therefore, by Itô's existence and uniqueness theorem, there exists a unique strong solution to the SDE.
+
+\begin{theorem}{(Itô's product rule)}
+    If $X_t$ and $Y_t$ are semimartingales, then
+    \begin{equation*}
+        d(X_t Y_t) = X_{t} dY_t + Y_{t} dX_t + d[X,Y]_t,
+    \end{equation*}
+    where $[X,Y]_t$ is the quadratic covariation of $X_t$ and $Y_t$.
+    \label{thm:product_rule}
+\end{theorem}
+
+\begin{proposition}{}
+    The discrete-time solution to the Ornstein-Uhlenbeck SDE is given by
+    \begin{equation*}
+        X_{n+1} = e^{-\lambda \Delta t} X_n + \sigma \int_{t_n}^{t_{n+1}} e^{-\lambda (t_{n+1}-s)} dW_s.
+    \end{equation*}
+    \label{prop:discrete_solution}
+\end{proposition}
+\begin{proof}
+    Using the integrating factor $e^{\lambda t}$, a finite-variation process satisfying $d[e^{\lambda t}, X_t] = 0$, by Itô's product rule we have
+    \begin{align*}
+        d(e^{\lambda t} X_t) &= e^{\lambda t}dX_t + \lambda e^{\lambda t} X_t dt\\
+        &= e^{\lambda t}(-\lambda X_t dt + \sigma dW_t) + \lambda e^{\lambda t} X_t dt\\
+        &= e^{\lambda t} \sigma dW_t.
+    \end{align*}
+    Therefore, integrating from $t_n$ to $t_{n+1} = t_n + \Delta t$ gives
+    \begin{align*}
+        e^{\lambda t_{n+1}}X_{n+1} - e^{\lambda t_n}X_n &= \sigma \int_{t_n}^{t_{n+1}} e^{\lambda s} dW_s\\
+        X_{n+1} &= e^{-\lambda \Delta t} X_n + \sigma \int_{t_n}^{t_{n+1}} e^{-\lambda (t_{n+1}-s)} dW_s.
+    \end{align*}
+\end{proof}
+
+
+\section{Distribution of the stochastic integral}
+\begin{theorem}{(Itô isometry)}
+    Let $W_t$ be a Brownian motion and let $f\in L^2([a,b])$ be deterministic. Then
+    \begin{equation*}
+        \mathbb{E}\left[\left(\int_a^b f(s) dW_s\right)^2\right] = \int_a^b f(s)^2 ds.
+    \end{equation*}
+    In particular,
+    \begin{equation*}
+        \int_a^b f(s) dW_s \sim \mathcal{N}\left(0, \int_a^b f(s)^2 ds\right).
+    \end{equation*}
+    \label{thm:ito_isometry}
+\end{theorem}
+
+\begin{corollary}{}
+    Let $X_t$ satisfy the Ornstein-Uhlenbeck SDE. Then, for any timestep $\Delta t > 0$,
+    \begin{equation*}
+        X_{n+1}\,\vert\,X_n \sim \mathcal{N}\left( e^{-\lambda \Delta t} X_n, \sigma^2 \int_{t_n}^{t_{n+1}} e^{-2\lambda (t_{n+1}-s)} ds \right).
+    \end{equation*}
+    Equivalently,
+    \begin{equation}
+        X_{n+1} = e^{-\lambda \Delta t} X_n + \sigma \sqrt{\frac{1-e^{-2\lambda \Delta t}}{2\lambda}}\,\xi_n,\quad \xi_n \overset{\mathrm{iid}}{\sim} \mathcal{N}(0,1)
+    \end{equation}
+    \label{cor:discrete_distribution}
+\end{corollary}
+
+\begin{proof}
+    By Proposition~\ref{prop:discrete_solution},
+    \begin{equation*}
+        X_{n+1} = e^{-\lambda \Delta t} X_n + \sigma \int_{t_n}^{t_{n+1}} e^{-\lambda (t_{n+1}-s)} dW_s.
+    \end{equation*}
+    The stochastic integral is Gaussian with mean zero. By Itô isometry,
+    \begin{align*}
+        \mathrm{Var}\,\left[\int_{t_n}^{t_{n+1}} e^{-\lambda (t_{n+1}-s)} dW_s\right] &= \int_{t_n}^{t_{n+1}} e^{-2\lambda (t_{n+1}-s)} ds\\
+        &= \frac{1-e^{-2\lambda\Delta t}}{2\lambda}.
+    \end{align*}
+    The result follows.
+\end{proof}
+
+Letting $\lambda = 1/\tau_c$, we obtain the form encountered in the main text:
+\begin{equation*}
+    X_{n+1} = e^{-\Delta t/\tau_c} X_n + \sigma \sqrt{\frac{\tau_c}{2}\left(1-e^{-2\Delta t/\tau_c}\right)}\,\xi_n.
+\end{equation*}
+Furthermore, note that the $\xi_n$ are independent because the stochastic integrals are taken over disjoint Brownian intervals.
+
+\section{Preference over Euler-Maruyama}
+Since the Ornstein–Uhlenbeck process possesses a closed-form solution, its transition law may be sampled exactly. This preserves the prescribed variance and exponential correlation function for arbitrary timestep and avoids the timestep-dependent bias introduced by Euler–Maruyama discretization. The exact update is therefore both more accurate and computationally more efficient for the correlation times considered in this work.
+
+
+\end{document}

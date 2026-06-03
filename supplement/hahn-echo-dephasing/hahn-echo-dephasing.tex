@@ -1,0 +1,146 @@
+\documentclass[12pt,reqno]{amsart}
+
+\usepackage{graphicx}
+
+\usepackage{amssymb}
+\usepackage{amsthm}
+\theoremstyle{plain}
+
+\newtheorem*{theorem*}{Theorem}
+%% this allows for theorems which are not automatically numbered
+
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{example}{Example}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\usepackage{lineno}
+
+%% The above lines are for formatting.  In general, you will not want to change these.
+
+
+\title{Analytic Hahn-echo dephasing functional}
+
+\author{Luca Roncoroni Seda}
+
+\begin{document}
+
+\begin{abstract}
+    This supplement derives the OU-averaged Hahn-echo attenuation factor used in the numerical simulation. Although the closed-form expression is not used explicitly in the main text, it motivates the stochastic phase accumulation model and provides a consistency check for the Monte Carlo simulation.
+\end{abstract}
+
+\maketitle
+
+We wish to justify the use of the following expression for \verb*|S| $\equiv S(2\tau)$ used in \verb*|ou.py| assuming no $T_1$ correction, namely:
+\begin{verbatim}
+def ou_hahn_echo_analytic(tau_values, T1, T2, omega0, 
+        gamma=2.675e8, T1_correction=False):
+    
+    ...
+
+    I = (
+        4 * tau_c * tau
+        - 6 * tau_c**2
+        + 8 * tau_c**2 * np.exp(-tau / tau_c)
+        - 2 * tau_c**2 * np.exp(-2 * tau / tau_c)
+    )
+
+    if T1_correction:
+        S = np.exp(-0.5 * gamma**2 * Delta2 * I) 
+                * np.exp(-tau / T1)
+    else:
+        S = np.exp(-0.5 * gamma**2 * Delta2 * I)
+
+    ...
+
+\end{verbatim}
+In other words, we want to show that
+\begin{equation*}
+    S(2\tau) = \exp{\left[ -\frac{1}{2}\gamma^2\Delta^2 \left(4\tau_c\tau - 6\tau_c^2 + 8\tau_c^2 e^{-\tau/\tau_c} - 2\tau_c^2 e^{-2\tau/\tau_c}\right) \right]}
+\end{equation*}
+
+\section{Field model}
+We define the Ornstein-Uhlenbeck fluctuating magnetic field $\mathfrak{B} (t)$ satisfying
+\begin{equation*}
+    \langle \mathfrak{B}(t) \rangle = 0, \quad \langle \mathfrak{B}(t)\mathfrak{B}(t+\tau)\rangle =\Delta^2 e^{-\lvert\tau\rvert/\tau_c}.
+\end{equation*}
+The accumulated phase is therefore
+\begin{equation*}
+    \phi(2\tau) = \gamma\int_{0}^{2\tau} y(t) \mathfrak{B}(t)\,dt,
+\end{equation*}
+where the Hahn-echo modulation function is given by
+\begin{equation*}
+    y(t) =
+    \begin{cases}
+        +1,\quad & 0<t<\tau\\
+        -1,\quad & \tau<t<2\tau.
+    \end{cases}
+\end{equation*}
+
+\section{Gaussian phase averaging}
+For the purpose of simulating the field defined in the previous section, we wish to derive an expression for the observed signal at time $t=2\tau$,
+\begin{equation*}
+    S(2\tau) = \left\langle e^{i\phi(t)}\right\rangle.
+\end{equation*}
+
+\begin{proposition}{}
+    If $\phi$ is a zero-mean Gaussian random variable, then
+    \begin{equation*}
+        \langle e^{i\phi}\rangle = \exp{\left[-\frac{1}{2}\mathrm{Var}(\phi)\right]}
+    \end{equation*}
+\end{proposition}
+\begin{proof}
+    One can check directly by evaluating the expectation $\langle e^{i\phi}\rangle$ with $\phi\sim\mathcal{N}(0,v)$
+\end{proof}
+
+Since $\mathfrak{B}(t)$ is Gaussian and $\phi$ is a linear functional of $\mathfrak{B}(t)$, $\phi$ is Gaussian. Therefore,
+\begin{align*}
+    S(2\tau) &= \langle e^{i\phi}\rangle\\
+    &= \exp{\left[ -\frac{1}{2}\gamma^2 \int_{0}^{2\tau}\int_{0}^{2\tau} y(t)y(s)\langle\mathfrak{B}(t)\mathfrak{B}(s)\rangle\, dt\,ds \right]}\\
+    &= \exp{\left[ -\frac{1}{2}\gamma^2 \Delta^2\int_{0}^{2\tau}\int_{0}^{2\tau} y(t)y(s)e^{-\lvert t-s \rvert/\tau_c}\, dt\,ds \right]}.
+\end{align*}
+
+\section{Evaluating the double integral}
+Let
+\begin{equation*}
+    I(\tau) = \int_{0}^{2\tau}\int_{0}^{2\tau} y(t)y(s)e^{-\lvert t-s \rvert/\tau_c}\, dt\,ds.
+\end{equation*}
+Then, define
+\begin{align*}
+    I_{11} &= \int_{0}^{\tau}\int_{0}^{\tau} e^{-\lvert t-s \rvert/\tau_c}\, dt\,ds,\\
+    I_{22} &= \int_{\tau}^{2\tau}\int_{\tau}^{2\tau} e^{-\lvert t-s \rvert/\tau_c}\, dt\,ds,\\
+    I_{12} &= \int_{0}^{\tau}\int_{\tau}^{2\tau} e^{-\lvert t-s \rvert/\tau_c}\, dt\,ds,\\
+    I_{21} &= \int_{\tau}^{2\tau}\int_{0}^{\tau} e^{-\lvert t-s \rvert/\tau_c}\, dt\,ds,
+\end{align*}
+so that $I(\tau) = I_{11} + I_{22} - I_{12} - I_{21}$. One quickly sees that $I_{11} = I_{22}$ and $I_{12} = I_{21}$, yielding
+\begin{equation*}
+    I(\tau) = 2I_{11} - 2I_{12}.
+\end{equation*}
+
+For $I_{11}$ we have
+\begin{align*}
+    I_{11} &= \int_{0}^{\tau}\int_{0}^{\tau} e^{-\lvert t-s \rvert/\tau_c}\, dt\,ds\\
+    &= 2\int_{0}^{\tau}\int_{0}^{t} e^{-(t-s)/\tau_c}\,dt\,ds\\
+    &= 2\tau_c\int_{0}^{\tau} \left(1-e^{-t/\tau_c}\right)\,dt\\
+    &= 2\tau_c \left[ t + \tau_c e^{-t/\tau_c}\right]_0^{\tau_c}\\
+    &= 2\tau_c\tau -2\tau_c^2\left(1-e^{-\tau/\tau_c}\right).
+\end{align*}
+Likewise, for $I_{12}$,
+\begin{align*}
+    I_{12} &= \int_{0}^{\tau}\int_{\tau}^{2\tau} e^{-\lvert t-s \rvert/\tau_c}\, dt\,ds\\
+    &= \int_{0}^{\tau}\int_{\tau}^{2\tau} e^{-(s-t)/\tau_c}\, dt\,ds\\
+    &= \left( \int_{0}^{\tau} e^{t/\tau_c}\,dt\right) \left( \int_{\tau}^{2\tau}e^{-s/\tau_c}\,ds\right)\\
+    &= \tau_c^2 \left( e^{\tau/\tau_c} - 1\right) \left( e^{-\tau/\tau_c} - e^{-2\tau/\tau_c}\right)\\
+    &= \tau_c^2 \left(1-e^{-\tau/\tau_c}\right)^2.
+\end{align*}
+Therefore,
+\begin{equation*}
+    I(\tau) = 4\tau_c\tau - 6\tau_c^2 + 8\tau_c^2 e^{-\tau/\tau_c} - 2\tau_c^2 e^{-2\tau/\tau_c},
+\end{equation*}
+giving us
+\begin{equation*}
+    \boxed{S(2\tau) = \exp{\left[ -\frac{1}{2}\gamma^2\Delta^2 \left(4\tau_c\tau - 6\tau_c^2 + 8\tau_c^2 e^{-\tau/\tau_c} - 2\tau_c^2 e^{-2\tau/\tau_c}\right) \right]}}.
+\end{equation*}
+
+\end{document}

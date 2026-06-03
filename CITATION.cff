@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+title: "Ornstein-Uhlenbeck Modeling of Pulsed NMR Relaxation"
+message: "If you use this project, please cite it as below."
+type: software
+authors:
+  - family-names: Roncoroni Seda
+    given-names: Luca
+year: 2026
+version: 0.1.0
